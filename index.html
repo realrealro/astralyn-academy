@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Astralyn Academy — A Whimsical Gothic Tale</title>
+  <!-- Fonts: more mystical titles + elegant body -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      /* Refined fantasy palette */
+      --bg-deep: #120f24;      /* midnight indigo */
+      --bg-grad: #2a1757;      /* deep amethyst */
+      --bg-pop:  #5f2da8;      /* royal violet */
+      --card: #211739;         /* eggplant */
+      --ink: #F3EEFF;          /* moonlit parchment */
+      --muted: #CBBCEB;        /* lavender mist */
+      --accent: #D8B4FE;       /* star lilac */
+      --accent-2: #F6C56B;     /* gilded highlight */
+      --shadow: rgba(0,0,0,.25);
+      --radius: 20px;
+      --maxw: 780px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--ink);
+      background:
+        radial-gradient(900px 600px at 15% 0%, #351a6b33, transparent 60%),
+        radial-gradient(1200px 800px at 80% 100%, #8a2be233, transparent 60%),
+        radial-gradient(1200px 800px at 20% 10%, var(--bg-grad), var(--bg-deep)) fixed;
+      font-family: Spectral, Georgia, serif;
+      line-height:1.7; letter-spacing:.15px; overflow-x:hidden;
+    }
+
+    /* Animated starfield + vignette */
+    .stars, .stars::before, .stars::after{
+      content:""; position:fixed; inset:0; pointer-events:none; background-repeat:repeat; mix-blend-mode:screen;
+      background-image: radial-gradient(2px 2px at 20% 30%, #ffffff 60%, transparent 61%),
+                        radial-gradient(2px 2px at 70% 80%, #ffffff 60%, transparent 61%),
+                        radial-gradient(1.5px 1.5px at 40% 60%, #ffffff 60%, transparent 61%),
+                        radial-gradient(1.5px 1.5px at 85% 20%, #ffffff 60%, transparent 61%);
+      animation: drift 50s linear infinite; opacity:.22;
+    }
+    .stars::before{animation-duration: 75s; opacity:.16}
+    .stars::after{animation-duration: 110s; opacity:.12}
+    @keyframes drift{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(-12px,-10px,0)}100%{transform:translate3d(0,0,0)}}
+
+    .wrap{max-width:var(--maxw); margin: min(8vh,64px) auto; padding: 0 16px;}
+
+    .card{
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 24px 60px var(--shadow);
+      border-radius: var(--radius);
+      padding: clamp(20px, 4vw, 30px);
+      backdrop-filter: blur(6px);
+      overflow: hidden;
+    }
+    .card::after{ /* faint corner sigil */
+      content:""; position:absolute; right:-60px; top:-60px; width:240px; height:240px; opacity:.08; pointer-events:none;
+      background: radial-gradient(circle at 50% 50%, var(--accent-2), transparent 60%);
+      filter: blur(8px);
+    }
+
+    h1{
+      font-family: Cinzel, serif; font-weight:700; letter-spacing:.4px;
+      margin:0 0 8px; font-size: clamp(30px, 5.2vw, 46px);
+      text-shadow: 0 2px 12px rgba(0,0,0,.25);
+    }
+    .subtitle{color:var(--muted); margin:0 0 18px; font-family: Cinzel, serif; letter-spacing:.3px}
+
+    #scene{font-size: clamp(16px, 2.9vw, 19px); margin: 10px 0 18px}
+
+    .choices{display:grid; gap:10px; grid-template-columns: 1fr;}
+    button.choice{
+      width:100%; border:none; border-radius: 14px; padding:14px 16px;
+      background: linear-gradient(180deg, #55308e, #3b246b);
+      color:var(--ink); font-weight:600; cursor:pointer; text-align:left;
+      box-shadow: 0 12px 20px rgba(43,25,77,.45);
+      transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
+      text-shadow: 0 1px 0 rgba(0,0,0,.2);
+    }
+    button.choice:hover{transform: translateY(-1px); box-shadow:0 14px 22px rgba(43,25,77,.50)}
+    button.choice:active{transform: translateY(0)}
+
+    .hud{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:16px; flex-wrap: wrap}
+    .tag{
+      display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px;
+      background: rgba(216,180,254,.13); border:1px solid rgba(216,180,254,.35); color:var(--muted);
+      font-size: 13px;
+    }
+    .actions{display:flex; gap:8px;}
+    .ghost{
+      background: transparent; border:1px solid rgba(255,255,255,.18); color:var(--ink); padding:10px 12px; border-radius:10px; cursor:pointer;
+    }
+    .primary{
+      background: linear-gradient(180deg, #a57bff, #8e66ef); border:0; color:#100b1b; font-weight:700; padding:10px 16px; border-radius:10px; cursor:pointer;
+      box-shadow: 0 8px 20px rgba(104,82,190,.35);
+    }
+    .tiny{font-size:12px; opacity:.85}
+    a{color:var(--accent)}
+
+    details.cast{margin-top:8px}
+    details.cast summary{cursor:pointer; color:var(--muted)}
+
+    /* Riddle UI */
+    .puzzle{margin:12px 0 6px; padding:12px; border:1px solid rgba(255,255,255,.12); border-radius:12px; background: rgba(255,255,255,.03)}
+    .wheels{display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:8px}
+    .wheel{display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px; background: linear-gradient(180deg,#2f2350,#261c42); border-radius:12px; border:1px solid rgba(255,255,255,.08)}
+    .wheel .face{font-family:Cinzel,serif; font-size:32px; transform: rotateX(0); transition: transform .25s ease}
+    .wheel.rot .face{transform: rotateX(360deg)}
+    .wheel .name{font-size:12px; color:var(--muted)}
+    .wheel button{border:1px solid rgba(255,255,255,.15); background:transparent; color:var(--ink); padding:6px 10px; border-radius:8px; cursor:pointer}
+    .riddle-hint{color:var(--muted); font-size:14px; margin-top:8px}
+    .assist{display:flex; gap:8px; margin-top:10px}
+
+    /* Responsive */
+    @media (min-width: 760px){ .choices{grid-template-columns: 1fr 1fr} }
+  </style>
+</head>
+<body>
+  <div class="stars" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="card" role="main" aria-live="polite">
+      <h1>Astralyn Academy</h1>
+      <p class="subtitle">A whimsical gothic micro‑adventure</p>
+
+      <div id="scene"></div>
+      <div class="choices" id="choices"></div>
+
+      <div class="hud">
+        <div class="tag" id="status">Elara · Chapter One</div>
+        <div class="actions">
+          <button class="ghost" id="back" title="Go back one step">← Back</button>
+          <button class="ghost" id="sound" title="Toggle ambience">♪ Sound</button>
+          <button class="ghost" id="restart" title="Start over">↺ Restart</button>
+          <button class="primary" id="share" title="Copy shareable link">Share</button>
+        </div>
+      </div>
+
+      <details class="cast" id="castbox">
+        <summary>Who’s who (tap to view)</summary>
+        <p class="tiny">Cast: <strong>Elara Thornfield</strong> (our inquisitive researcher), <strong>Lyra Windmere</strong> (mysterious librarian), <strong>Finn Alderidge</strong> (friendly student), and <strong>Aurelius</strong> (the guardian).</p>
+      </details>
+    </div>
+  </div>
+
+  <script>
+    // --- Simple state + router for a branching story ---
+    const state = {
+      lore: false,          // learned extra lore before entering
+      boon: false,          // earned guardian's favor/boon
+      grumpy: false,        // annoyed the guardian
+      fails: 0,             // riddle fail count
+      history: [],          // simple back stack (does not undo flags)
+      visited: new Set(),
+    };
+
+    const $scene = document.getElementById('scene');
+    const $choices = document.getElementById('choices');
+    const $status = document.getElementById('status');
+    const $back = document.getElementById('back');
+
+    // --- SFX/ambience via WebAudio (softer, more mystical) ---
+    let audioCtx = null, isPlaying = false, padNodes = [];
+    function ctx(){ return audioCtx || (audioCtx = new (window.AudioContext||window.webkitAudioContext)()); }
+    function tone(freq=660, type='sine', dur=0.25, vol=0.05){
+      const ac = ctx();
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      const f = ac.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.value = 4000;
+      o.type = type; o.frequency.value = freq; g.gain.value = 0.0001;
+      o.connect(g).connect(f).connect(ac.destination);
+      const t = ac.currentTime;
+      g.gain.linearRampToValueAtTime(vol, t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.00001, t+dur);
+      o.start(); o.stop(t+dur+0.05);
+    }
+    const sfx = {
+      click(){ tone(520,'triangle',0.12,0.035); },
+      tick(){ tone(760,'sine',0.08,0.03); },
+      success(){ tone(880,'triangle',0.22,0.05); setTimeout(()=>tone(1320,'triangle',0.22,0.045),140); },
+      fail(){ tone(260,'sine',0.28,0.03); },
+      gate(){ tone(330,'sine',0.9,0.035); setTimeout(()=>tone(280,'sine',0.9,0.03),220); }
+    };
+
+    function startAmbience(){
+      if(isPlaying) return; const ac = ctx();
+      const base = 246.94; // B3 for a warmer feel (Lydian-ish when layered)
+      const gains = [];
+      for(const ratio of [1, 5/4, 3/2, 9/8]){ // B, D#, F#, C#
+        const osc = ac.createOscillator();
+        osc.type = 'sine'; osc.frequency.value = base * ratio;
+        const g = ac.createGain(); g.gain.value = 0.0001;
+        osc.connect(g).connect(ac.destination); osc.start();
+        padNodes.push({osc, g}); gains.push(g);
+      }
+      let t = ac.currentTime; gains.forEach(g=> g.gain.linearRampToValueAtTime(0.04, t+1.8));
+      // gentle chimes, slower and higher so it feels wondrous not spooky
+      const id = setInterval(()=>{ if(!isPlaying) { clearInterval(id); return; }
+        const pitch = 880 * (1 + Math.random()*0.35); tone(pitch,'triangle',2.4,0.028);
+      }, 5200 + Math.random()*2400);
+      isPlaying = true; document.getElementById('sound').textContent = '♪ Sound: On';
+    }
+    function stopAmbience(){ if(!isPlaying) return; const ac = ctx();
+      padNodes.forEach(({osc,g})=>{ try{ g.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime+1.2); osc.stop(ac.currentTime+1.3);}catch(e){} });
+      padNodes = []; isPlaying = false; document.getElementById('sound').textContent = '♪ Sound: Off'; }
+    function toggleAmbience(){ if(!isPlaying) startAmbience(); else stopAmbience(); }
+
+    // UI hooks
+    document.addEventListener('click', e=>{ if(e.target.matches('button')) sfx.click(); }, true);
+
+    const scenes = {
+      intro: {
+        text: `It is past midnight at <em>Astralyn Academy</em>. In the hushed library, a door that wasn’t there at dusk breathes a faint violet glow. 
+        You are <strong>Elara Thornfield</strong>, a new researcher discreetly drawn here by whispers of a cosmic gateway. The air tastes of old vellum and starlight.`,
+        choices: [
+          { label: "Open the glowing door.", go: "star_corridor" },
+          { label: "Hold off and investigate first.", go: "investigate" },
+        ]
+      },
+
+      investigate: {
+        text: `You steady your breath. Secrets prefer patience. A dim lamp burns within the librarian’s nook. 
+        You could consult <strong>Lyra Windmere</strong>, or comb the Restricted Stacks alone.`,
+        choices: [
+          { label: "Speak with Lyra Windmere.", go: "with_lyra" },
+          { label: "Search the Restricted Stacks myself.", go: "stacks" },
+        ]
+      },
+
+      with_lyra: {
+        text: `<strong>Lyra</strong> studies you over half‑moon spectacles. “The door answers intent,” she murmurs, slipping you a moon‑sigil pendant. “For sight in the dark between stars.”`,
+        enter(){ state.lore = true; },
+        choices: [ { label: "Return to the door.", go: "star_corridor" } ]
+      },
+
+      stacks: {
+        text: `Dust blooms as you leaf through astral charts. A note tucked within reads: “<em>Align the Heir’s three constellations</em>.” The parchment tingles with warding ink.`,
+        enter(){ state.lore = true; },
+        choices: [
+          { label: "Return to the door.", go: "star_corridor" },
+          { label: "Pocket the chart and slip deeper...", go: "secret_annex_hint" },
+        ]
+      },
+
+      star_corridor: {
+        text: `The door sighs open. A corridor of slow‑turning starlight unfolds. 
+        A whisper of laughter—<strong>Finn Alderidge</strong> edges from a column of shadow. “I knew I wasn’t the only one seeing it,” he says, offering a small lantern.`,
+        choices: [
+          { label: "Accept Finn’s lantern and proceed.", go: "guardian" },
+          { label: "Thank him but go alone.", go: "guardian_alone" },
+        ]
+      },
+
+      guardian: {
+        text: `At the corridor’s end coils <strong>Aurelius</strong>, a dragon carved from night and gold. “Answer, and pass,” the guardian rumbles. 
+        Constellations spin overhead, waiting to be named.`,
+        choices: [
+          { label: "Solve the riddle by aligning the constellations.", go: "riddle" },
+          { label: "Force the gate—trust instinct over riddles.", go: "force_gate" },
+        ]
+      },
+
+      guardian_alone: {
+        text: `Alone, you step beneath Aurelius’s gaze. The dragon tilts his horned crown. “Some paths favor solitude. Will yours?”`,
+        choices: [
+          { label: "Study the constellations carefully.", go: "riddle" },
+          { label: "Push ahead before doubt can root.", go: "force_gate" },
+        ]
+      },
+
+      riddle: {
+        enter(){ if(state.lore){ state.boon = true; } sfx.tick(); },
+        customRender(){
+          $scene.innerHTML = `<p>${state.lore
+            ? 'The moon‑sigil warms. Three astral wheels surface: <em>Heir</em>, <em>Vessel</em>, <em>Watcher</em>. Align them to open the gate.'
+            : 'Three stubborn astral wheels grind up from the floor. Align the correct pattern to open the gate.'}</p>`;
+
+          const target = [3,1,5];                       // ✺, ✦, ✸
+          const secret = [2,2,2];                       // ✹✹✹ → secret scene
+          const symbols = ['✶','✦','✹','✺','✷','✸'];   // 0..5
+          const names = ['Heir','Vessel','Watcher'];
+          const values = [ state.lore ? 3 : 0, state.lore ? 1 : 0, state.lore ? 5 : 0 ]; // pre-fill aid if lore
+
+          const cont = document.createElement('div'); cont.className = 'puzzle'; cont.innerHTML = `<div class="wheels"></div>`; $scene.appendChild(cont);
+          const grid = cont.querySelector('.wheels');
+
+          function wheel(i){
+            const box = document.createElement('div'); box.className = 'wheel';
+            box.innerHTML = `
+              <div class="name">${names[i]}</div>
+              <div class="face" id="face${i}">${symbols[values[i]]}</div>
+              <div>
+                <button id="l${i}">◀</button>
+                <button id="r${i}">▶</button>
+              </div>`;
+            grid.appendChild(box);
+            document.getElementById(`l${i}`).addEventListener('click',()=>{ values[i]=(values[i]+symbols.length-1)%symbols.length; update(i); });
+            document.getElementById(`r${i}`).addEventListener('click',()=>{ values[i]=(values[i]+1)%symbols.length; update(i); });
+          }
+          for(let i=0;i<3;i++) wheel(i);
+
+          const hint = document.createElement('div'); hint.className = 'riddle-hint';
+          hint.innerHTML = state.lore ? 'Lyra\'s note: “Align the Heir\'s three constellations.” The <em>Heir</em> prefers <strong>rare stars</strong>.' : 'Some patterns repeat across founders. Listen for the gate\'s hum.';
+          cont.appendChild(hint);
+
+          const tools = document.createElement('div'); tools.className = 'assist';
+          const hintBtn = document.createElement('button'); hintBtn.className='ghost'; hintBtn.textContent='Hint';
+          const storyBtn = document.createElement('button'); storyBtn.className='ghost'; storyBtn.textContent='Story Mode (skip)';
+          tools.append(hintBtn, storyBtn); cont.appendChild(tools);
+
+          const proceed = document.createElement('button'); proceed.className = 'choice'; proceed.textContent = 'Step through the unveiled gate.';
+          proceed.disabled = true; proceed.style.opacity = .6; proceed.addEventListener('click', ()=> { sfx.gate(); render('revelation'); });
+          $choices.innerHTML = ''; $choices.appendChild(proceed);
+
+          let hintedIndex = 0; // reveal next wheel symbol on each hint
+          hintBtn.addEventListener('click', ()=>{
+            const reveal = target[hintedIndex]; values[hintedIndex] = reveal; update(hintedIndex, true); hintedIndex = Math.min(hintedIndex+1,2);
+          });
+          storyBtn.addEventListener('click', ()=>{ values[0]=target[0]; values[1]=target[1]; values[2]=target[2]; update(2,true); });
+
+          function update(i, quiet){
+            document.getElementById(`face${i}`).textContent = symbols[values[i]];
+            document.getElementById(`face${i}`).parentElement.classList.add('rot');
+            setTimeout(()=>document.getElementById(`face${i}`).parentElement.classList.remove('rot'),180);
+            if(!quiet) sfx.tick();
+            const ok = values.every((v,idx)=> v===target[idx]);
+            const isSecret = values.every((v,idx)=> v===secret[idx]);
+            if(isSecret){ render('secret_annex'); return; }
+            proceed.disabled = !ok; proceed.style.opacity = ok?1:.6;
+          }
+        }
+      },
+
+      force_gate: {
+        enter(){ state.grumpy = true; },
+        text: `You drive your will into the seam of reality. The corridor bucks; starlight shivers. Aurelius’s frill flares—yet the gate yields, resentful.`,
+        choices: [
+          { label: "Face Aurelius and accept a penitent task.", go: "appease" },
+          { label: "Slip through quickly while it’s open.", go: "revelation" },
+        ]
+      },
+
+      appease: {
+        enter(){ state.boon = false; },
+        text: `“Power without witness tends to ruin,” Aurelius says. “Speak a vow.” Your voice steadies: to seek knowledge with care. The gate calms, grudging but clear.`,
+        choices: [ { label: "Proceed through the gate.", go: "revelation" } ]
+      },
+
+      revelation: {
+        text(){
+          const lines = [];
+          lines.push(`Beyond the threshold lies a sky‑lit rotunda—astral maps and dragon‑script circling a stone dais. A sigil answers your presence.`);
+          if(state.boon){ lines.push(`<em>Favor clings like perfume.</em> A hidden panel opens, revealing the Founders’ ledger: Astralyn was raised by stargazers and dragon‑keepers to tend this very gate.`); }
+          else if(state.grumpy){ lines.push(`The air is watchful. Your steps echo. You are admitted, not embraced. The truth remains: Astralyn’s founders tended this gate to guard what waits beyond.`); }
+          else { lines.push(`You catch enough to understand: Astralyn’s founders tended this gate to guard what waits beyond.`); }
+          lines.push(`At the dais, two paths brighten.`);
+          return lines.join(' ');
+        },
+        choices: [
+          { label: "Embrace the legacy—become a junior Gatekeeper.", go: "ending_legacy" },
+          { label: "Seek further mysteries beyond the academy.", go: "ending_wander" },
+        ]
+      },
+
+      ending_legacy: {
+        text(){
+          return state.boon
+            ? `Aurelius’s shadow crowns you. Lyra smiles as if she always knew. <strong>Elara Thornfield</strong>, Gatekeeper of Astralyn: starlight bends a little more kindly around your name.`
+            : `You kneel at the dais and the sigil acknowledges you. Not favored—yet chosen. Gatekeeping begins in humility.`;
+        },
+        choices: [ { label: "✦ The End (for now) — Restart", go: "reset" } ]
+      },
+
+      ending_wander: {
+        text: `You copy the maps, tuck the moon‑sigil close, and slip into night. Stars wheel like doorways. Somewhere, a second gate waits for a name you haven’t learned yet.`,
+        choices: [ { label: "✦ The End (for now) — Restart", go: "reset" } ]
+      },
+
+      // --- Secret scenes ---
+      secret_annex_hint: {
+        text: `A shelf clicks. A draft like cold ink. Between biographies and bestiaries, the wood is hollow. A sigil glows—three stars in a row.`,
+        choices: [ { label: "Memorize the sigil and retreat.", go: "star_corridor" } ]
+      },
+
+      secret_annex: {
+        enter(){ sfx.success(); },
+        text: `The wheels settle on a forbidden harmony: ✹✹✹. The floor releases a hush. You drop—not down, but aside—into the <strong>Auric Annex</strong>, a pocket study where time passes like turning pages. On a lectern: a map fragment pointing beyond Astralyn’s walls to a <em>constellation well</em>.`,
+        choices: [
+          { label: "Pocket the fragment and return to the riddle room.", go: "riddle" },
+          { label: "Use the Annex door and skip to the rotunda.", go: "revelation" },
+        ]
+      },
+
+      secret_drift: {
+        enter(){ sfx.fail(); },
+        text: `Your third mistake thins the corridor into fog. You find yourself walking the <strong>Drift Between</strong>—a pale copy of the star hall where footsteps echo before they land. In the fog, something old hums a warning: <em>Ask before you take</em>.`,
+        choices: [
+          { label: "Promise aloud to ask—and try again.", go: "riddle" },
+          { label: "Force the way regardless.", go: "force_gate" },
+        ]
+      },
+
+      reset: { text: "", choices: [] }
+    };
+
+    function doRender(id){
+      const node = scenes[id]; if(!node) return;
+      if(typeof node.enter === 'function') node.enter();
+      state.visited.add(id);
+
+      if(typeof node.customRender === 'function'){
+        $scene.innerHTML = ''; $choices.innerHTML = '';
+        node.customRender();
+      } else {
+        const text = typeof node.text === 'function' ? node.text() : node.text;
+        $scene.innerHTML = `<p>${text}</p>`;
+        $choices.innerHTML = '';
+        node.choices.forEach(c => {
+          const b = document.createElement('button'); b.className = 'choice'; b.textContent = c.label; b.addEventListener('click', ()=> render(c.go)); $choices.appendChild(b);
+        });
+      }
+
+      // HUD status
+      const chapter = id.startsWith('ending') ? 'Epilogue' : 'Chapter One';
+      const tags = ["Elara", chapter]; if(state.lore) tags.push('Lore'); if(state.boon) tags.push('Boon'); if(state.grumpy) tags.push('Aurelius: wary');
+      $status.textContent = tags.join(' · ');
+
+      // back button state
+      $back.disabled = state.history.length === 0; $back.style.opacity = $back.disabled ? .5 : 1;
+
+      history.replaceState(null, '', `#${encode(id)}`);
+    }
+
+    function render(id){
+      if(id === 'reset'){ Object.assign(state, { lore:false, boon:false, grumpy:false, fails:0, history:[], visited:new Set() }); return render('intro'); }
+      // push current route for back stack
+      const current = currentId(); if(current && current !== id) state.history.push(current);
+      doRender(id);
+    }
+
+    // shareable hash routing with flags
+    function encode(id){ const flags = [state.lore?'1':'0', state.boon?'1':'0', state.grumpy?'1':'0', state.fails].join(''); return `${id}|${flags}`; }
+    function decode(hash){ const [id] = (hash || '').split('|'); return id || 'intro'; }
+
+    document.getElementById('restart').addEventListener('click', ()=> render('reset'));
+    document.getElementById('share').addEventListener('click', ()=>{
+      const url = location.href.split('#')[0] + '#' + encode(currentId());
+      navigator.clipboard.writeText(url).then(()=>{ const btn = document.getElementById('share'); const old = btn.textContent; btn.textContent = 'Copied!'; setTimeout(()=> btn.textContent = old, 1200); });
+    });
+    document.getElementById('sound').addEventListener('click', toggleAmbience);
+    $back.addEventListener('click', ()=>{ if(state.history.length){ const prev = state.history.pop(); doRender(prev); } });
+
+    function currentId(){ const h = location.hash.slice(1); return (h.split('|')[0] || 'intro'); }
+
+    // fail → secret drift
+    const _render = render; render = function(id){ if(id==='fail'){ state.fails++; if(state.fails>=2) { doRender('secret_drift'); return; } } _render(id); };
+
+    // Initialize
+    const startId = decode(location.hash.slice(1));
+    doRender(startId);
+  </script>
+</body>
+</html>
